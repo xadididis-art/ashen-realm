@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#090b12">
+<title>ASHEN REALM — RPG Battle</title>
+<style>
+:root{--bg:#090b12;--panel:#141925;--gold:#e9bd72;--red:#e45b64;--blue:#69b9e8;--green:#8ed6a0;--muted:#9ba5b7}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:#f3f0e9;font-family:Georgia,serif}
+body{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);display:flex;justify-content:center}
+.game{width:min(100%,900px);min-height:100vh;padding:12px;display:flex;flex-direction:column;gap:10px;background:radial-gradient(ellipse at 50% 0%,#20253a 0,#0b0e17 58%,#07090f 100%)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.logo{font-size:clamp(18px,4vw,26px);letter-spacing:3px;color:var(--gold);text-shadow:0 0 18px #c58b4666}
+.sub{font:10px Arial,sans-serif;letter-spacing:2px;color:var(--muted)}
+.pill{border:1px solid #45404a;background:#151925;color:#d8c7a5;border-radius:20px;padding:7px 10px;font:11px Arial}
+.arena{position:relative;overflow:hidden;border:1px solid #554a46;border-radius:15px;min-height:300px;height:min(48vh,440px);background:linear-gradient(#141b2a 0%,#22253a 48%,#403344 72%,#171923 73%,#0e1119 100%);box-shadow:inset 0 0 70px #05070c,0 12px 35px #0008}
+.moon{position:absolute;width:76px;height:76px;border-radius:50%;background:#e5d7b6;right:15%;top:12%;box-shadow:0 0 35px #e8d6ad77;opacity:.7}
+.mountain{position:absolute;bottom:26%;width:120%;height:42%;left:-10%;background:#171b2b;clip-path:polygon(0 100%,15% 35%,25% 72%,42% 5%,55% 65%,72% 20%,85% 70%,100% 30%,100% 100%)}
+.ruin{position:absolute;bottom:26%;left:8%;width:45px;height:115px;border:8px solid #242536;border-bottom:0;opacity:.8}
+.ruin:after{content:"";position:absolute;right:-85px;top:35px;width:80px;height:80px;border:7px solid #242536;border-bottom:0}
+.floor{position:absolute;bottom:0;height:29%;width:100%;background:repeating-linear-gradient(165deg,#24212b 0 2px,#171923 2px 18px);border-top:2px solid #62504a}
+.fog{position:absolute;bottom:18%;width:140%;height:50px;left:-20%;background:#a7a4c018;filter:blur(18px);animation:fog 9s ease-in-out infinite alternate}
+@keyframes fog{to{transform:translateX(8%)}}
+.stage{position:absolute;top:12px;left:13px;font:11px Arial;letter-spacing:1.5px;color:#e5d5b9;text-shadow:0 2px 5px #000}
+.actor{position:absolute;bottom:22%;width:32%;height:57%;display:flex;align-items:center;justify-content:center;transition:transform .22s;filter:drop-shadow(0 8px 7px #0009)}
+.actor.player{left:8%}.actor.enemy{right:7%}
+.actor svg{height:100%;max-width:100%;overflow:visible}
+.actor.attack-left{transform:translateX(42px) rotate(-5deg)}.actor.attack-right{transform:translateX(-42px) rotate(5deg)}
+.actor.hit{filter:brightness(2.3) drop-shadow(0 0 18px #ff5366);transform:translateX(-8px)}
+.actor.block{filter:drop-shadow(0 0 16px #75c9ff)}
+.actor.dead{opacity:.25;transform:translateY(45px) rotate(30deg)}
+.battleflash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}.battleflash.on{animation:flash .25s}
+@keyframes flash{0%{opacity:.5}100%{opacity:0}}
+.slash{position:absolute;top:42%;left:38%;font-size:54px;color:#fff4c9;text-shadow:0 0 20px #ffbd59;opacity:0;transform:rotate(-25deg)}
+.slash.on{animation:slash .38s}
+@keyframes slash{0%{opacity:0;transform:translate(25px,20px) rotate(-25deg) scale(.3)}45%{opacity:1;transform:translate(0,0) rotate(-25deg) scale(1.2)}100%{opacity:0;transform:translate(-20px,-15px) rotate(-25deg) scale(1.5)}}
+.damage{position:absolute;font:bold 24px Arial;color:#fff2c7;text-shadow:0 2px 5px #000,0 0 12px #ff6b44;pointer-events:none;animation:float .9s forwards}
+@keyframes float{to{transform:translateY(-65px);opacity:0}}
+.hud{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.unit{background:linear-gradient(135deg,#171d2a,#10141e);border:1px solid #3b3c49;border-radius:12px;padding:10px}
+.unit-head{display:flex;justify-content:space-between;gap:5px;font-size:14px;margin-bottom:7px}.unit-head small{font:10px Arial;color:var(--muted)}
+.bar{height:9px;background:#080b11;border-radius:9px;overflow:hidden;margin:4px 0 7px}.fill{height:100%;width:100%;transition:width .35s;border-radius:9px}.hp{background:linear-gradient(90deg,#a92f43,#f17872)}.mp{background:linear-gradient(90deg,#256cbb,#70c9f4)}.exp{background:linear-gradient(90deg,#8b6ac9,#d5a8ff)}
+.stats{display:flex;justify-content:space-between;font:10px Arial;color:#aeb7c5}
+.log{min-height:45px;padding:10px 12px;border:1px solid #383642;background:#10141e;border-radius:10px;font:12px/1.45 Arial;color:#d9d4c9}
+.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+button{font: bold 13px Arial;letter-spacing:.4px;border:1px solid #63564c;border-radius:11px;padding:13px 7px;color:#f7f1e7;background:linear-gradient(180deg,#333344,#1a1d2b);min-height:48px;touch-action:manipulation;cursor:pointer}
+button:active{transform:scale(.97);filter:brightness(1.25)}button:disabled{opacity:.35;filter:grayscale(1)}
+button.primary{border-color:#a87545;background:linear-gradient(180deg,#89532f,#492b26)}button.blue{border-color:#497fa4;background:linear-gradient(180deg,#285779,#182b43)}button.green{border-color:#4e8a68;background:linear-gradient(180deg,#326c50,#1c3b32)}
+button.purple{border-color:#8562a8;background:linear-gradient(180deg,#5c3d80,#302442)}
+.bottom{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--muted);font:10px Arial}
+.overlay{position:fixed;inset:0;background:#05070de8;display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
+.modal{width:min(100%,420px);background:linear-gradient(145deg,#202438,#111520);border:1px solid #786044;border-radius:18px;padding:24px;text-align:center;box-shadow:0 20px 80px #000}
+.modal h1{color:var(--gold);letter-spacing:3px;font-size:25px}.modal p{font:13px/1.6 Arial;color:#c5c5ce}.modal button{width:100%;margin-top:10px}
+.hidden{display:none!important}
+@media(min-width:650px){.game{padding:18px}.arena{height:430px}.actor{width:27%}.controls{grid-template-columns:repeat(6,1fr)}}
+</style>
+</head>
+<body>
+<main class="game">
+ <header class="top"><div><div class="logo">ASHEN REALM</div><div class="sub">A DARK FANTASY RPG</div></div><div class="pill" id="levelTag">LEVEL 1</div></header>
+ <section class="arena" id="arena">
+  <div class="moon"></div><div class="mountain"></div><div class="ruin"></div><div class="floor"></div><div class="fog"></div>
+  <div class="stage" id="stageName">STAGE 1 · GOBLIN FOREST</div>
+  <div class="actor player" id="playerSprite"></div><div class="actor enemy" id="enemySprite"></div>
+  <div class="slash" id="slash">✦</div><div class="battleflash" id="flash"></div>
+ </section>
+ <section class="hud">
+  <div class="unit"><div class="unit-head"><span>⚔ <b id="playerName">Wanderer</b></span><small id="playerLevel">LV 1</small></div><div class="bar"><div class="fill hp" id="pHp"></div></div><div class="bar"><div class="fill mp" id="pMp"></div></div><div class="stats"><span id="pHpText">100 / 100 HP</span><span id="pMpText">40 / 40 MP</span></div></div>
+  <div class="unit"><div class="unit-head"><span>☠ <b id="enemyName">Goblin Scout</b></span><small id="enemyType">BEAST</small></div><div class="bar"><div class="fill hp" id="eHp"></div></div><div class="bar"><div class="fill mp" id="eMp"></div></div><div class="stats"><span id="eHpText">55 / 55 HP</span><span id="eMpText">20 / 20 MP</span></div></div>
+ </section>
+ <div class="log" id="log" aria-live="polite">A goblin scout blocks your path. Choose your move.</div>
+ <section class="controls">
+  <button class="primary" id="attack">⚔ ATTACK</button>
+  <button class="blue" id="defend">🛡 DEFEND</button>
+  <button class="green" id="counter">↶ COUNTER</button>
+  <button class="purple" id="skill">✧ FIREBURST <small id="skillCost">12 MP</small></button>
+  <button id="heal">✚ HEAL <small>8 MP</small></button>
+  <button id="dodge">➤ DODGE</button>
+ </section>
+ <footer class="bottom"><span id="progress">EXP 0 / 50</span><span>Sound <button id="sound" style="padding:5px 9px;min-height:26px">ON</button></span><button id="restart" style="padding:6px 10px;min-height:28px">RESTART</button></footer>
+</main>
+<div class="overlay" id="intro"><div class="modal"><div style="font-size:42px">⚔️</div><h1>ASHEN REALM</h1><p>Darkness has swallowed the old kingdoms. Take up your blade, defeat the creatures ahead, and grow stronger with every victory.</p><p><b>Battle tip:</b> Defend to reduce damage. Counter is strongest immediately after an enemy attack. Skills consume mana.</p><button class="primary" id="start">ENTER THE REALM</button></div></div>
+<div class="overlay hidden" id="result"><div class="modal"><div id="resultIcon" style="font-size:45px">🏆</div><h1 id="resultTitle">VICTORY</h1><p id="resultText"></p><button class="primary" id="next">CONTINUE</button><button id="again">RESTART RUN</button></div></div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const stages=[
+ {name:"GOBLIN FOREST",enemies:[{name:"Goblin Scout",kind:"goblin",hp:55,mp:20,atk:9,exp:25},{name:"Goblin Raider",kind:"goblin",hp:72,mp:24,atk:12,exp:30}]},
+ {name:"SKELETON DUNGEON",enemies:[{name:"Bone Archer",kind:"skeleton",hp:85,mp:30,atk:14,exp:38},{name:"Skeleton Guard",kind:"skeleton",hp:105,mp:35,atk:16,exp:42}]},
+ {name:"ORC BATTLEFIELD",enemies:[{name:"Orc Brute",kind:"orc",hp:145,mp:35,atk:20,exp:55},{name:"Orc Warlord",kind:"orc",hp:175,mp:45,atk:23,exp:65}]},
+ {name:"DARK KNIGHT CASTLE",enemies:[{name:"Dark Knight",kind:"knight",hp:220,mp:60,atk:27,exp:85}]},
+ {name:"DEMON KING'S DOMAIN",enemies:[{name:"Demon King",kind:"boss",hp:390,mp:100,atk:34,exp:180,boss:true}]}
+];
+const svg=(kind,hero=false)=> {
+ let body=hero?`<path d="M45 35 L65 35 L73 78 L37 78Z" fill="#34465c" stroke="#a9c4d8" stroke-width="2"/><path d="M43 40 L32 70 L43 73 L53 49 M66 43 L82 67 L73 74 L58 51" fill="#59677b" stroke="#c4d1db" stroke-width="2"/><path d="M43 76 L42 112 L54 112 L57 79 M62 78 L65 112 L77 112 L70 75" fill="#252d3c" stroke="#a9c4d8" stroke-width="2"/><path d="M44 33 Q55 8 69 33 L66 46 L45 45Z" fill="#b78a62" stroke="#f1d0a0" stroke-width="2"/><path d="M41 31 Q55 0 73 28 L68 37 L43 37Z" fill="#c3cbd4" stroke="#f0d7a6" stroke-width="3"/><path d="M78 48 L104 15" stroke="#dce7f2" stroke-width="5"/><path d="M99 12 L108 4" stroke="#e9c77e" stroke-width="3"/>`
+ :kind==="goblin"?`<path d="M38 39 L70 39 L76 82 L34 82Z" fill="#486b42" stroke="#a6c77a" stroke-width="2"/><path d="M42 77 L38 112 L52 112 L57 81 M62 80 L68 112 L81 112 L72 77" fill="#34352e"/><path d="M40 36 L24 14 L47 25 M66 35 L86 12 L82 37" fill="#638c4e" stroke="#b2ce75" stroke-width="3"/><path d="M39 24 Q55 4 75 25 L72 48 L40 47Z" fill="#71934f"/><circle cx="48" cy="32" r="3" fill="#ffe89a"/><circle cx="66" cy="32" r="3" fill="#ffe89a"/><path d="M52 43 L61 43 L56 51Z" fill="#eee1bd"/>`
+ :kind==="skeleton"?`<path d="M42 43 L68 43 L72 82 L38 82Z" fill="#b9b4a2" stroke="#e9e1ca" stroke-width="2"/><path d="M42 78 L39 112 L52 112 L56 82 M62 82 L68 112 L80 112 L71 78" fill="#777568"/><circle cx="55" cy="27" r="19" fill="#d9d3bf" stroke="#fff1d0" stroke-width="2"/><circle cx="48" cy="26" r="5" fill="#302c35"/><circle cx="63" cy="26" r="5" fill="#302c35"/><path d="M49 39 L62 39" stroke="#514a48" stroke-width="3"/><path d="M38 48 L22 76 M72 48 L91 73" stroke="#d9d3bf" stroke-width="7"/>`
+ :kind==="orc"?`<path d="M32 38 L77 38 L82 86 L28 86Z" fill="#537447" stroke="#b3c77a" stroke-width="3"/><path d="M35 80 L31 114 L49 114 L55 84 M62 84 L68 114 L86 114 L76 80" fill="#39382f"/><path d="M34 28 Q55 0 79 28 L75 51 L36 50Z" fill="#668b52"/><path d="M39 44 L30 33 L45 39 M68 39 L84 30 L75 46" fill="#eee1bd"/><path d="M47 27 L52 27 M65 27 L70 27" stroke="#ffe49a" stroke-width="5"/><path d="M34 55 L17 83 L31 88 L47 64 M73 58 L94 81 L82 91 L65 67" fill="#537447"/>`
+ :`<path d="M30 37 L78 37 L88 88 L22 88Z" fill="#4c2638" stroke="#d36a5f" stroke-width="3"/><path d="M32 82 L27 116 L47 116 L53 87 M64 87 L72 116 L92 116 L79 82" fill="#24202b"/><path d="M35 31 Q53 -2 80 28 L76 51 L33 50Z" fill="#6c3040" stroke="#d78b68" stroke-width="3"/><path d="M39 18 L26 0 L47 12 M69 12 L91 -2 L78 23" fill="#9b3e3f" stroke="#e59a69" stroke-width="3"/><circle cx="46" cy="32" r="4" fill="#ffdf77"/><circle cx="68" cy="32" r="4" fill="#ffdf77"/>`;
+ return `<svg viewBox="0 0 120 125" role="img" aria-label="${hero?'Warrior':kind}">${body}</svg>`;
+};
+let s={level:1,xp:0,xpNext:50,maxHp:100,hp:100,maxMp:40,mp:40,atk:15,stage:0,enemyIndex:0,enemy:null,guard:false,counterReady:false,dodgeReady:true,busy:false,sound:true,won:false};
+function spawn(){let list=stages[s.stage].enemies;s.enemy=list[Math.min(s.enemyIndex,list.length-1)];s.enemy={...s.enemy,maxHp:s.enemy.hp,hp:s.enemy.hp};$("enemySprite").innerHTML=svg(s.enemy.kind);$("enemySprite").className="actor enemy";$("stageName").textContent=`STAGE ${s.stage+1} · ${stages[s.stage].name}`;$("enemyName").textContent=s.enemy.name;$("enemyType").textContent=s.enemy.boss?"BOSS":s.enemy.kind.toUpperCase();s.guard=false;s.counterReady=false;log(`${s.enemy.name} approaches. Choose your move.`);render()}
+function log(t){$("log").textContent=t}
+function render(){
+ $("levelTag").textContent="LEVEL "+s.level;$("playerLevel").textContent="LV "+s.level;
+ $("pHp").style.width=100*s.hp/s.maxHp+"%";$("pMp").style.width=100*s.mp/s.maxMp+"%";
+ $("eHp").style.width=100*s.enemy.hp/s.enemy.maxHp+"%";$("eMp").style.width=100*s.enemy.mp/s.enemy.maxMp+"%";
+ $("pHpText").textContent=`${s.hp} / ${s.maxHp} HP`;$("pMpText").textContent=`${s.mp} / ${s.maxMp} MP`;
+ $("eHpText").textContent=`${s.enemy.hp} / ${s.enemy.maxHp} HP`;$("eMpText").textContent=`${s.enemy.mp} / ${s.enemy.maxMp} MP`;
+ $("progress").textContent=`EXP ${s.xp} / ${s.xpNext}`;$("skill").disabled=s.busy||s.mp<12||s.enemy.hp<=0;$("heal").disabled=s.busy||s.mp<8||s.hp===s.maxHp;
+ ["attack","defend","counter","dodge"].forEach(id=>$(id).disabled=s.busy||s.enemy.hp<=0);
+ $("counter").textContent=s.counterReady?"↶ COUNTER READY":"↶ COUNTER";
+ $("dodge").textContent=s.dodgeReady?"➤ DODGE":"➤ DODGE";
+}
+function floatDamage(target,n,label=""){let el=document.createElement("div");el.className="damage";el.textContent=label||"-"+n;let a=$(target),r=a.getBoundingClientRect(),ar=$("arena").getBoundingClientRect();el.style.left=(r.left-ar.left+r.width/2)+"px";el.style.top=(r.top-ar.top+15)+"px";$("arena").appendChild(el);setTimeout(()=>el.remove(),950)}
+function animate(id,cls,dur=350){let el=$(id);el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),dur)}
+function flash(){ $("flash").classList.remove("on");void $("flash").offsetWidth;$("flash").classList.add("on")}
+function beep(freq=240,dur=.09){if(!s.sound)return;try{let c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.frequency.value=freq;o.type="sawtooth";g.gain.value=.035;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+dur);o.onended=()=>c.close()}catch(e){}}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function playerAction(type){
+ if(s.busy||s.enemy.hp<=0)return;s.busy=true;render();
+ if(type==="attack"){animate("playerSprite","attack-left",420);$("slash").classList.remove("on");void $("slash").offsetWidth;$("slash").classList.add("on");await wait(180);let d=s.atk+Math.floor(Math.random()*7);if(Math.random()<.15)d=Math.round(d*1.7);s.enemy.hp=Math.max(0,s.enemy.hp-d);floatDamage("enemySprite",d);animate("enemySprite","hit");flash();beep(190);log(`You strike ${s.enemy.name} for ${d} damage.`)}
+ if(type==="defend"){s.guard=true;s.counterReady=true;animate("playerSprite","block",650);log("You raise your guard. The next incoming hit is reduced, and your counter is ready.");}
+ if(type==="counter"){if(!s.counterReady){log("No opening yet. Defend first or wait for an enemy attack.");s.busy=false;render();return}animate("playerSprite","attack-left",420);await wait(180);let d=s.atk+12+Math.floor(Math.random()*8);s.enemy.hp=Math.max(0,s.enemy.hp-d);floatDamage("enemySprite",d,"COUNTER -"+d);animate("enemySprite","hit");s.counterReady=false;beep(320);log(`Perfect counter! You deal ${d} damage.`)}
+ if(type==="skill"){s.mp-=12;animate("playerSprite","attack-left",500);await wait(160);let d=30+s.level*5+Math.floor(Math.random()*10);s.enemy.hp=Math.max(0,s.enemy.hp-d);floatDamage("enemySprite",d,"✦ "+d);animate("enemySprite","hit");flash();beep(520,.16);log(`FIREBURST! Flames deal ${d} damage.`)}
+ if(type==="heal"){s.mp-=8;let h=Math.min(28+s.level*3,s.maxHp-s.hp);s.hp+=h;floatDamage("playerSprite",h,"+"+h+" HP");log(`You restore ${h} HP with a healing spell.`)}
+ if(type==="dodge"){if(!s.dodgeReady){log("Dodge is still recovering. Choose another action.");s.busy=false;render();return}s.dodgeReady=false;animate("playerSprite","attack-left",350);s.guard="dodge";log("You prepare to evade the next enemy strike.");}
+ render();await wait(350);
+ if(s.enemy.hp<=0){victory();return}
+ await enemyTurn();s.busy=false;render();
+}
+async function enemyTurn(){
+ await wait(250);let e=s.enemy,heavy=e.boss||e.kind==="orc"||e.kind==="knight";let special=heavy&&Math.random()<.32;let d=e.atk+(special?12:Math.floor(Math.random()*5));
+ if(s.guard==="dodge"){log("You evade the enemy's attack!");floatDamage("playerSprite",0,"MISS");s.guard=false;beep(430);s.dodgeReady=true;await wait(450);return}
+ animate("enemySprite","attack-right",420);await wait(180);
+ if(s.guard===true){d=Math.max(1,Math.floor(d*.25));s.guard=false;floatDamage("playerSprite",d,"BLOCK -"+d);log(`You block the strike and take only ${d} damage. Your counter window is open.`);s.counterReady=true}
+ else{ s.hp=Math.max(0,s.hp-d);floatDamage("playerSprite",d);animate("playerSprite","hit");flash();beep(110);log(`${e.name} ${special?"uses a devastating special attack":"attacks"}! You take ${d} damage.`);s.counterReady=true}
+ s.dodgeReady=true;render();await wait(350);
+ if(s.hp<=0){gameOver();return}
+}
+function victory(){
+ s.busy=true;let gain=s.enemy.exp;s.xp+=gain;s.mp=Math.min(s.maxMp,s.mp+8);log(`${s.enemy.name} defeated! You gained ${gain} EXP and recovered 8 MP.`);$("enemySprite").classList.add("dead");render();
+ while(s.xp>=s.xpNext){s.xp-=s.xpNext;s.level++;s.xpNext=Math.floor(s.xpNext*1.45);s.maxHp+=18;s.maxMp+=6;s.atk+=4;s.hp=s.maxHp;s.mp=s.maxMp;log(`LEVEL UP! You are now level ${s.level}. Your stats increased!`)}
+ let final=s.stage===4&&s.enemyIndex===0;
+ $("resultIcon").textContent=final?"👑":"🏆";$("resultTitle").textContent=final?"REALM RESTORED":"VICTORY";$("resultText").textContent=final?`The Demon King has fallen. You completed Ashen Realm at level ${s.level}!`:`You defeated ${s.enemy.name}. Earned ${gain} EXP. Your journey continues.`;$("next").textContent=final?"PLAY AGAIN":"NEXT BATTLE";$("result").classList.remove("hidden");beep(600,.2)
+}
+function gameOver(){s.busy=true;$("resultIcon").textContent="💀";$("resultTitle").textContent="DEFEAT";$("resultText").textContent="Your journey ends here... but every fallen warrior can rise again. Try a different strategy.";$("next").textContent="TRY AGAIN";$("result").classList.remove("hidden")}
+function advance(){ $("result").classList.add("hidden");if(s.hp<=0){reset();return}if(s.stage===4&&s.enemyIndex===0){reset();return}s.enemyIndex++;if(s.enemyIndex>=stages[s.stage].enemies.length){s.stage++;s.enemyIndex=0}if(s.stage>=stages.length){reset();return}s.hp=Math.min(s.maxHp,s.hp+20);s.mp=Math.min(s.maxMp,s.mp+12);s.busy=false;spawn()}
+function reset(){s={level:1,xp:0,xpNext:50,maxHp:100,hp:100,maxMp:40,mp:40,atk:15,stage:0,enemyIndex:0,enemy:null,guard:false,counterReady:false,dodgeReady:true,busy:false,sound:s.sound};$("result").classList.add("hidden");spawn()}
+$("start").onclick=()=>{$("intro").classList.add("hidden");spawn()};
+$("attack").onclick=()=>playerAction("attack");$("defend").onclick=()=>playerAction("defend");$("counter").onclick=()=>playerAction("counter");$("skill").onclick=()=>playerAction("skill");$("heal").onclick=()=>playerAction("heal");$("dodge").onclick=()=>playerAction("dodge");
+$("next").onclick=advance;$("again").onclick=reset;$("restart").onclick=()=>{if(confirm("Restart your run from level 1?"))reset()};
+$("sound").onclick=()=>{s.sound=!s.sound;$("sound").textContent=s.sound?"ON":"OFF";if(s.sound)beep()};
+$("playerSprite").innerHTML=svg("hero",true);$("enemySprite").innerHTML=svg("goblin");spawn();
+})();
+</script>
+</body>
+</html>
